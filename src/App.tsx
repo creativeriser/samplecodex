@@ -1,95 +1,153 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+} from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { RecommendationsPage } from './pages/RecommendationsPage';
 import { VisitDetailsPage } from './pages/VisitDetailsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { BrowsePage } from './pages/BrowsePage';
-import { Sidebar } from './components/Sidebar';
-import { Header } from './components/Header';
+import { ProtectedLayout } from './components/layout/ProtectedLayout';
 import './styles/globals.css';
 
-type Page = 'login' | 'dashboard' | 'recommendations' | 'browse' | 'profile' | 'visit-details';
+type LayoutPage = 'dashboard' | 'recommendations' | 'browse' | 'profile' | 'visit-details';
+
+const pageTitles: Record<LayoutPage, { title: string; subtitle?: string }> = {
+  dashboard: { title: 'Dashboard', subtitle: 'Student Dashboard' },
+  recommendations: { title: 'Recommendations', subtitle: 'Personalized for You' },
+  browse: { title: 'Browse Visits', subtitle: 'All Available Opportunities' },
+  profile: { title: 'Profile', subtitle: 'Your Academic Information' },
+  'visit-details': { title: 'Visit Details', subtitle: 'Industry Visit Information' },
+};
+
+const pageToPath = (page: string, visitId?: string) => {
+  switch (page) {
+    case 'dashboard':
+      return '/dashboard';
+    case 'recommendations':
+      return '/recommendations';
+    case 'browse':
+      return '/browse';
+    case 'profile':
+      return '/profile';
+    case 'visit-details':
+      return visitId ? `/visit-details/${visitId}` : '/visit-details';
+    case 'login':
+      return '/login';
+    default:
+      return `/${page}`;
+  }
+};
+
+const getPageFromPath = (pathname: string): LayoutPage => {
+  if (pathname.startsWith('/recommendations')) return 'recommendations';
+  if (pathname.startsWith('/browse')) return 'browse';
+  if (pathname.startsWith('/profile')) return 'profile';
+  if (pathname.startsWith('/visit-details')) return 'visit-details';
+  return 'dashboard';
+};
+
+function VisitDetailsRoute({
+  onNavigate,
+}: {
+  onNavigate: (page: string, visitId?: string) => void;
+}) {
+  const { visitId = '' } = useParams<{ visitId: string }>();
+  return <VisitDetailsPage visitId={visitId} onNavigate={onNavigate} />;
+}
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentPage, setCurrentPage] = useState<Page>('dashboard');
-  const [selectedVisitId, setSelectedVisitId] = useState<string>('');
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleLogin = () => {
+  const currentPage = useMemo(
+    () => getPageFromPath(location.pathname),
+    [location.pathname],
+  );
+  const { title, subtitle } = pageTitles[currentPage];
+
+  const handleNavigate = useCallback(
+    (page: string, visitId?: string) => {
+      const path = pageToPath(page, visitId);
+      navigate(path);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [navigate],
+  );
+
+  const handleLayoutNavigate = useCallback(
+    (page: string) => {
+      handleNavigate(page);
+    },
+    [handleNavigate],
+  );
+
+  const handleLogin = useCallback(() => {
     setIsLoggedIn(true);
-    setCurrentPage('dashboard');
-  };
+    const state = location.state as { from?: { pathname: string } } | null;
+    const destination =
+      state?.from?.pathname && state.from.pathname !== '/login'
+        ? state.from.pathname
+        : '/dashboard';
+    navigate(destination, { replace: true });
+  }, [location.state, navigate]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     setIsLoggedIn(false);
-    setCurrentPage('login');
-  };
+    navigate('/login', { replace: true });
+  }, [navigate]);
 
-  const handleNavigate = (page: string, visitId?: string) => {
-    setCurrentPage(page as Page);
-    if (visitId) {
-      setSelectedVisitId(visitId);
-    }
-    // Scroll to top on navigation
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Page titles for header
-  const pageTitles: Record<Exclude<Page, 'login'>, { title: string; subtitle?: string }> = {
-    dashboard: { title: 'Dashboard', subtitle: 'Student Dashboard' },
-    recommendations: { title: 'Recommendations', subtitle: 'Personalized for You' },
-    browse: { title: 'Browse Visits', subtitle: 'All Available Opportunities' },
-    profile: { title: 'Profile', subtitle: 'Your Academic Information' },
-    'visit-details': { title: 'Visit Details', subtitle: 'Industry Visit Information' },
-  };
-
-  // Show login page if not logged in
-  if (!isLoggedIn) {
-    return <LoginPage onLogin={handleLogin} />;
-  }
-
-  // Main application layout with sidebar
   return (
-    <div className="flex min-h-screen bg-neutral-50">
-      {/* Sidebar */}
-      <Sidebar
-        currentPage={currentPage}
-        onNavigate={handleNavigate}
-        onLogout={handleLogout}
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          isLoggedIn ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <LoginPage onLogin={handleLogin} />
+          )
+        }
       />
-
-      {/* Main Content Area */}
-      <div className="flex-1 ml-64">
-        {/* Header */}
-        <Header
-          title={pageTitles[currentPage].title}
-          subtitle={pageTitles[currentPage].subtitle}
+      <Route
+        path="/"
+        element={
+          <ProtectedLayout
+            isLoggedIn={isLoggedIn}
+            onLogout={handleLogout}
+            onNavigate={handleLayoutNavigate}
+            title={title}
+            subtitle={subtitle}
+            currentPage={currentPage}
+          />
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<DashboardPage onNavigate={handleNavigate} />} />
+        <Route
+          path="recommendations"
+          element={<RecommendationsPage onNavigate={handleNavigate} />}
         />
-
-        {/* Page Content */}
-        <main className="p-8">
-          {currentPage === 'dashboard' && (
-            <DashboardPage onNavigate={handleNavigate} />
-          )}
-          {currentPage === 'recommendations' && (
-            <RecommendationsPage onNavigate={handleNavigate} />
-          )}
-          {currentPage === 'browse' && (
-            <BrowsePage onNavigate={handleNavigate} />
-          )}
-          {currentPage === 'profile' && (
-            <ProfilePage onNavigate={handleNavigate} />
-          )}
-          {currentPage === 'visit-details' && (
-            <VisitDetailsPage
-              visitId={selectedVisitId}
-              onNavigate={handleNavigate}
-            />
-          )}
-        </main>
-      </div>
-    </div>
+        <Route path="browse" element={<BrowsePage onNavigate={handleNavigate} />} />
+        <Route path="profile" element={<ProfilePage onNavigate={handleNavigate} />} />
+        <Route path="visit-details" element={<VisitDetailsRoute onNavigate={handleNavigate} />} />
+        <Route
+          path="visit-details/:visitId"
+          element={<VisitDetailsRoute onNavigate={handleNavigate} />}
+        />
+      </Route>
+      <Route
+        path="*"
+        element={<Navigate to={isLoggedIn ? '/dashboard' : '/login'} replace />}
+      />
+    </Routes>
   );
 }
 

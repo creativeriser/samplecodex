@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Card } from '../components/Card';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Card, CardContent, CardFooter, CardHeader } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
+import { EmptyState } from '../components/EmptyState';
 import { ArrowRight, Filter } from 'lucide-react';
 import { mockVisits } from '../data/visits';
 
@@ -11,26 +12,51 @@ interface RecommendationsPageProps {
 
 export function RecommendationsPage({ onNavigate }: RecommendationsPageProps) {
   const [filterDiscipline, setFilterDiscipline] = useState<string>('all');
+  const [isLoading, setIsLoading] = useState(true);
+  const [visits, setVisits] = useState<typeof mockVisits>([]);
 
-  const disciplines = ['all', ...Array.from(new Set(mockVisits.map(v => v.discipline)))];
-  
-  const filteredVisits = filterDiscipline === 'all'
-    ? mockVisits
-    : mockVisits.filter(v => v.discipline === filterDiscipline);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setVisits(mockVisits);
+      setIsLoading(false);
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const disciplines = useMemo(
+    () => ['all', ...Array.from(new Set(mockVisits.map((v) => v.discipline)))],
+    [],
+  );
+
+  const filteredVisits = useMemo(() => {
+    if (filterDiscipline === 'all') {
+      return visits;
+    }
+    return visits.filter((v) => v.discipline === filterDiscipline);
+  }, [filterDiscipline, visits]);
+
+  const hasResults = !isLoading && filteredVisits.length > 0;
+  const hasAnyVisits = !isLoading && visits.length > 0;
+  const skeletonCards = useMemo<number[]>(() => Array.from({ length: 6 }, (_, index) => index), []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Page Description */}
-      <Card className="p-6">
-        <h3 className="text-neutral-900 mb-2">Personalized Recommendations</h3>
-        <p className="text-neutral-600">
-          Industry visits curated for your academic discipline with high learning value and relevance to your program.
-        </p>
+      <Card>
+        <CardHeader>
+          <h3 className="text-neutral-900 text-xl font-semibold tracking-tight">Personalized Recommendations</h3>
+        </CardHeader>
+        <CardContent className="pt-3 text-neutral-600">
+          <p className="leading-relaxed line-clamp-3">
+            Industry visits curated for your academic discipline with high learning value and relevance to your program.
+          </p>
+        </CardContent>
       </Card>
 
       {/* Filters */}
-      <Card className="p-4">
-        <div className="flex items-center gap-4">
+      <Card>
+        <CardContent className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2 text-neutral-700">
             <Filter size={20} />
             <span>Filter by Discipline:</span>
@@ -39,8 +65,10 @@ export function RecommendationsPage({ onNavigate }: RecommendationsPageProps) {
             {disciplines.map((discipline) => (
               <button
                 key={discipline}
+                type="button"
                 onClick={() => setFilterDiscipline(discipline)}
-                className={`px-3 py-1.5 rounded-lg text-sm transition-colors duration-200 ${
+                aria-pressed={filterDiscipline === discipline}
+                className={`px-3 py-1.5 rounded-[var(--radius-sm)] text-sm transition-colors duration-200 ${
                   filterDiscipline === discipline
                     ? 'bg-primary-700 text-white'
                     : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
@@ -50,72 +78,111 @@ export function RecommendationsPage({ onNavigate }: RecommendationsPageProps) {
               </button>
             ))}
           </div>
-        </div>
+        </CardContent>
       </Card>
 
       {/* Results Count */}
-      <div className="flex items-center justify-between">
-        <p className="text-neutral-600">
-          Showing <span className="text-neutral-900">{filteredVisits.length}</span> recommendations
+      <div className="flex flex-wrap items-center justify-between gap-2 text-neutral-600">
+        <p aria-live="polite">
+          {isLoading ? (
+            'Loading tailored recommendations…'
+          ) : (
+            <>
+              Showing <span className="text-neutral-900">{filteredVisits.length}</span> recommendations
+            </>
+          )}
         </p>
       </div>
 
       {/* Recommendations Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredVisits.map((visit) => (
-          <Card key={visit.id} hover className="p-6 flex flex-col">
-            {/* Header with Badges */}
-            <div className="flex items-start justify-between mb-4">
-              <Badge variant="primary">{visit.discipline}</Badge>
-              <Badge variant={visit.matchScore === 'High' ? 'success' : 'accent'}>
-                {visit.matchScore} Match
-              </Badge>
-            </div>
+      {isLoading && (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr" aria-busy="true">
+          {skeletonCards.map((key) => (
+            <Card key={key} className="border-neutral-100 h-full">
+              <CardHeader className="pb-2 space-y-2">
+                <div className="h-5 w-20 bg-neutral-200 rounded-md" aria-hidden="true" />
+                <div className="h-4 w-16 bg-neutral-100 rounded-md" aria-hidden="true" />
+              </CardHeader>
+              <CardContent className="space-y-3 pt-1">
+                <div className="h-4 w-3/4 bg-neutral-100 rounded-md" aria-hidden="true" />
+                <div className="h-4 w-2/3 bg-neutral-100 rounded-md" aria-hidden="true" />
+                <div className="h-20 w-full bg-neutral-50 rounded-md" aria-hidden="true" />
+              </CardContent>
+              <CardFooter>
+                <div className="h-10 w-28 bg-neutral-100 rounded-md" aria-hidden="true" />
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
 
-            {/* Organization Name */}
-            <h4 className="text-neutral-900 mb-2">
-              {visit.organizationName}
-            </h4>
-
-            {/* Industry Type & Location */}
-            <div className="flex flex-col gap-1 mb-3 text-sm text-neutral-600">
-              <p>{visit.industryType}</p>
-              <p>{visit.location}</p>
-            </div>
-
-            {/* Description */}
-            <p className="text-neutral-600 text-sm mb-4 flex-1 line-clamp-4">
-              {visit.description}
-            </p>
-
-            {/* Action Button */}
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => onNavigate('visit-details', visit.id)}
-              className="w-full justify-center"
-            >
-              View Details
-              <ArrowRight size={16} className="ml-2" />
-            </Button>
-          </Card>
-        ))}
-      </div>
+      {hasResults && (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
+          {filteredVisits.map((visit) => (
+            <Card key={visit.id} className="h-full">
+              <CardHeader className="pb-2 flex items-start justify-between">
+                <Badge variant="primary">{visit.discipline}</Badge>
+                <Badge variant={visit.matchScore === 'High' ? 'success' : 'accent'}>
+                  {visit.matchScore} Match
+                </Badge>
+              </CardHeader>
+              <CardContent className="space-y-3 pt-1">
+                <div className="space-y-1">
+                  <h4 className="text-neutral-900 text-lg font-semibold tracking-tight leading-snug">
+                    {visit.organizationName}
+                  </h4>
+                  <div className="text-sm text-neutral-600 leading-relaxed space-y-0.5">
+                    <p>{visit.industryType}</p>
+                    <p>{visit.location}</p>
+                  </div>
+                </div>
+                <p className="text-neutral-600 text-sm leading-relaxed tracking-[0.005em] line-clamp-3">
+                  {visit.description}
+                </p>
+              </CardContent>
+              <CardFooter className="gap-3">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => onNavigate('visit-details', visit.id)}
+                  className="w-full sm:w-auto min-w-[9rem] justify-center"
+                >
+                  View Details
+                  <ArrowRight size={16} className="ml-2" />
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* No Results Message */}
-      {filteredVisits.length === 0 && (
-        <Card className="p-12 text-center">
-          <p className="text-neutral-600">
-            No recommendations found for the selected discipline.
-          </p>
-          <Button
-            variant="secondary"
-            onClick={() => setFilterDiscipline('all')}
-            className="mt-4"
-          >
-            Clear Filters
-          </Button>
-        </Card>
+      {!isLoading && !hasResults && hasAnyVisits && (
+        <EmptyState
+          title="No recommendations match"
+          description="No recommendations fit that selection. Use the discipline filter above to try another match or clear filters to review the full list."
+          actions={[
+            {
+              label: 'Clear filters',
+              variant: 'secondary',
+              onClick: () => setFilterDiscipline('all'),
+            },
+          ]}
+        />
+      )}
+
+      {!isLoading && !hasAnyVisits && (
+        <EmptyState
+          title="Recommendations are on their way"
+          description="We’re still curating tailored visits for your programme. Check back soon, or browse the full catalogue to keep planning in the meantime."
+          actions={[
+            {
+              label: 'Browse all visits',
+              variant: 'primary',
+              onClick: () => onNavigate('browse'),
+            },
+          ]}
+        />
       )}
     </div>
   );

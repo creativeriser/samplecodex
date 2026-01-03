@@ -39,6 +39,11 @@
   --color-neutral-800: #262626;
   --color-neutral-900: #171717;
 
+  /* Shared Radii */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+
   /* Semantic Colors */
   --color-success: #22c55e;
   --color-warning: #f59e0b;
@@ -137,4 +142,27 @@ button {
 
 .card-shadow-lg {
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.line-clamp-2,
+.line-clamp-3,
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+}
+
+.line-clamp-4 {
+  line-clamp: 4;
+  -webkit-line-clamp: 4;
 }
