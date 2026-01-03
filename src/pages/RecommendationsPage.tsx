@@ -99,16 +99,16 @@ export function RecommendationsPage({ onNavigate }: RecommendationsPageProps) {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr" aria-busy="true">
           {skeletonCards.map((key) => (
             <Card key={key} className="border-neutral-100 h-full">
-              <CardHeader className="pb-2 space-y-2">
+              <CardHeader className="pt-6 pb-2 space-y-2">
                 <div className="h-5 w-20 bg-neutral-200 rounded-md" aria-hidden="true" />
                 <div className="h-4 w-16 bg-neutral-100 rounded-md" aria-hidden="true" />
               </CardHeader>
-              <CardContent className="space-y-4 pt-2">
+              <CardContent className="space-y-4">
                 <div className="h-4 w-3/4 bg-neutral-100 rounded-md" aria-hidden="true" />
                 <div className="h-4 w-2/3 bg-neutral-100 rounded-md" aria-hidden="true" />
                 <div className="h-20 w-full bg-neutral-50 rounded-md" aria-hidden="true" />
               </CardContent>
-              <CardFooter>
+              <CardFooter className="justify-between sm:justify-end">
                 <div className="h-10 w-28 bg-neutral-100 rounded-md" aria-hidden="true" />
               </CardFooter>
             </Card>
@@ -120,13 +120,13 @@ export function RecommendationsPage({ onNavigate }: RecommendationsPageProps) {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
           {filteredVisits.map((visit) => (
             <Card key={visit.id} className="h-full">
-              <CardHeader className="pb-2 flex items-start justify-between">
+              <CardHeader className="pt-6 pb-2 flex items-start justify-between">
                 <Badge variant="primary">{visit.discipline}</Badge>
                 <Badge variant={visit.matchScore === 'High' ? 'success' : 'accent'}>
                   {visit.matchScore} Match
                 </Badge>
               </CardHeader>
-              <CardContent className="space-y-4 pt-2">
+              <CardContent className="space-y-5 pt-2">
                 <div className="space-y-1.5">
                   <h4 className="text-neutral-900 text-lg font-semibold tracking-tight leading-snug">
                     {visit.organizationName}
@@ -140,12 +140,12 @@ export function RecommendationsPage({ onNavigate }: RecommendationsPageProps) {
                   {visit.description}
                 </p>
               </CardContent>
-              <CardFooter className="gap-4">
+              <CardFooter className="gap-4 justify-between sm:justify-end">
                 <Button
                   variant="primary"
-                  size="sm"
+                  size="md"
                   onClick={() => onNavigate('visit-details', visit.id)}
-                  className="w-full sm:w-auto min-w-[10rem] justify-center"
+                  className="w-full sm:w-auto min-w-[11rem] justify-center"
                 >
                   View Details
                   <ArrowRight size={16} className="ml-2" />
