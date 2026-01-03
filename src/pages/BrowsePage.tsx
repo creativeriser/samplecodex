@@ -67,7 +67,7 @@ export function BrowsePage({ onNavigate }: BrowsePageProps) {
                 <div className="h-5 w-24 bg-neutral-200 rounded-md" aria-hidden="true" />
                 <div className="h-4 w-32 bg-neutral-100 rounded-md" aria-hidden="true" />
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-4">
                 <div className="h-4 w-3/4 bg-neutral-100 rounded-md" aria-hidden="true" />
                 <div className="h-4 w-1/2 bg-neutral-100 rounded-md" aria-hidden="true" />
                 <div className="h-20 w-full bg-neutral-50 rounded-md" aria-hidden="true" />
@@ -93,8 +93,8 @@ export function BrowsePage({ onNavigate }: BrowsePageProps) {
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3 pt-1">
-                <div className="space-y-1">
+              <CardContent className="space-y-4 pt-2">
+                <div className="space-y-1.5">
                   <h4 className="text-neutral-900 text-lg font-semibold tracking-tight leading-snug">
                     {visit.organizationName}
                   </h4>
@@ -102,15 +102,15 @@ export function BrowsePage({ onNavigate }: BrowsePageProps) {
                     {visit.industryType} • {visit.location}
                   </p>
                 </div>
-                <p className="text-neutral-600 text-sm leading-relaxed tracking-[0.005em] line-clamp-3">
+                <p className="text-neutral-600 text-sm leading-relaxed tracking-[0.01em] line-clamp-3">
                   {visit.description}
                 </p>
               </CardContent>
-              <CardFooter className="gap-3">
+              <CardFooter className="gap-4">
                 <Button
-                  variant="secondary"
+                  variant="primary"
                   onClick={() => onNavigate('visit-details', visit.id)}
-                  className="w-full sm:w-auto min-w-[9rem] justify-center"
+                  className="w-full sm:w-auto min-w-[10rem] justify-center"
                 >
                   View Details
                   <ArrowRight size={18} className="ml-2" />
