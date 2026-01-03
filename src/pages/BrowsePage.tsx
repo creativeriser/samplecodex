@@ -106,15 +106,15 @@ export function BrowsePage({ onNavigate }: BrowsePageProps) {
                   {visit.description}
                 </p>
               </CardContent>
-              <CardFooter className="gap-4 justify-between sm:justify-end">
+              <CardFooter className="gap-3 sm:gap-4 sm:justify-end">
                 <Button
                   variant="primary"
                   size="md"
                   onClick={() => onNavigate('visit-details', visit.id)}
-                  className="w-full sm:w-auto min-w-[11rem] justify-center"
+                  className="w-full sm:w-auto min-w-[10rem] justify-center"
                 >
                   View Details
-                  <ArrowRight size={18} className="ml-2" />
+                  <ArrowRight size={16} className="ml-2" />
                 </Button>
               </CardFooter>
             </Card>
