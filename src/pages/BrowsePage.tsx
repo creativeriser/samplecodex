@@ -62,18 +62,18 @@ export function BrowsePage({ onNavigate }: BrowsePageProps) {
       {isLoading && (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr" aria-busy="true">
           {skeletonCards.map((key) => (
-            <Card key={key} className="border-neutral-100 h-full">
-              <CardHeader className="pt-6 pb-2 space-y-2">
+            <Card key={key} className="border-neutral-200 h-full">
+              <CardHeader className="pt-7 pb-3 space-y-3">
                 <div className="h-5 w-24 bg-neutral-200 rounded-md" aria-hidden="true" />
                 <div className="h-4 w-32 bg-neutral-100 rounded-md" aria-hidden="true" />
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-5">
                 <div className="h-4 w-3/4 bg-neutral-100 rounded-md" aria-hidden="true" />
                 <div className="h-4 w-1/2 bg-neutral-100 rounded-md" aria-hidden="true" />
                 <div className="h-20 w-full bg-neutral-50 rounded-md" aria-hidden="true" />
               </CardContent>
-              <CardFooter className="justify-between sm:justify-end">
-                <div className="h-10 w-32 bg-neutral-100 rounded-md" aria-hidden="true" />
+              <CardFooter className="justify-end">
+                <div className="h-11 w-36 bg-neutral-100 rounded-[10px]" aria-hidden="true" />
               </CardFooter>
             </Card>
           ))}
@@ -85,7 +85,7 @@ export function BrowsePage({ onNavigate }: BrowsePageProps) {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
           {visits.map((visit) => (
             <Card key={visit.id} className="h-full">
-              <CardHeader className="pt-6 pb-2">
+              <CardHeader className="pt-7 pb-3">
                 <div className="flex flex-wrap items-center gap-2.5">
                   <Badge variant="primary">{visit.discipline}</Badge>
                   <Badge variant={visit.matchScore === 'High' ? 'success' : 'accent'}>
@@ -93,8 +93,8 @@ export function BrowsePage({ onNavigate }: BrowsePageProps) {
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-5 pt-2">
-                <div className="space-y-1.5">
+              <CardContent className="space-y-5 pt-3">
+                <div className="space-y-2">
                   <h4 className="text-neutral-900 text-lg font-semibold tracking-tight leading-snug">
                     {visit.organizationName}
                   </h4>
@@ -111,7 +111,7 @@ export function BrowsePage({ onNavigate }: BrowsePageProps) {
                   variant="primary"
                   size="md"
                   onClick={() => onNavigate('visit-details', visit.id)}
-                  className="w-full sm:w-auto min-w-[10rem] justify-center"
+                  className="w-full sm:w-auto min-w-[11rem] justify-center"
                 >
                   View Details
                   <ArrowRight size={16} className="ml-2" />
